@@ -1,24 +1,23 @@
 ﻿#include <windows.h>
 #include <string>
 #include <iostream>
+#include <cwctype>
+#include <locale.h>
 
+// ===================== COPY SELECTION =====================
 void SendCtrlC() {
     INPUT inputs[4] = {};
 
-    // Ctrl down
     inputs[0].type = INPUT_KEYBOARD;
     inputs[0].ki.wVk = VK_CONTROL;
 
-    // C down
     inputs[1].type = INPUT_KEYBOARD;
     inputs[1].ki.wVk = 'C';
 
-    // C up
     inputs[2].type = INPUT_KEYBOARD;
     inputs[2].ki.wVk = 'C';
     inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
 
-    // Ctrl up
     inputs[3].type = INPUT_KEYBOARD;
     inputs[3].ki.wVk = VK_CONTROL;
     inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
@@ -26,62 +25,59 @@ void SendCtrlC() {
     SendInput(4, inputs, sizeof(INPUT));
 }
 
-std::string GetClipboardText() {
+// ===================== CLIPBOARD (UNICODE) =====================
+std::wstring GetClipboardTextW() {
     if (!OpenClipboard(nullptr))
-        return "";
+        return L"";
 
-    HANDLE hData = GetClipboardData(CF_TEXT);
-    if (hData == nullptr) {
+    HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+    if (!hData) {
         CloseClipboard();
-        return "";
+        return L"";
     }
 
-    char* pszText = static_cast<char*>(GlobalLock(hData));
-    if (pszText == nullptr) {
+    wchar_t* pszText = static_cast<wchar_t*>(GlobalLock(hData));
+    if (!pszText) {
         CloseClipboard();
-        return "";
+        return L"";
     }
 
-    std::string text = pszText;
+    std::wstring text = pszText;
+
     GlobalUnlock(hData);
     CloseClipboard();
     return text;
 }
 
-// Toggle case (from 'a' to 'A' OR from 'A' to 'a')
-std::string InvertCase(const std::string& text) {
-    std::string result = text;
-    for (char& c : result) {
-        if (c >= 'a' && c <= 'z')
-            c = c - 32;
-        else if (c >= 'A' && c <= 'Z')
-            c = c + 32;
+// ===================== CASE FUNCTIONS =====================
+std::wstring InvertCase(const std::wstring& text) {
+    std::wstring result = text;
+    for (wchar_t& c : result) {
+        if (iswlower(c))
+            c = towupper(c);
+        else if (iswupper(c))
+            c = towlower(c);
     }
     return result;
 }
 
-// Make all text smaller
-std::string LowerCase(const std::string& text) {
-    std::string result = text;
-    for (char& c : result) {
-        if (c >= 'A' && c <= 'Z')
-            c = c + 32;   // A -> a
-    }
+std::wstring LowerCase(const std::wstring& text) {
+    std::wstring result = text;
+    for (wchar_t& c : result)
+        c = towlower(c);
     return result;
 }
 
-// Make all text Uppercase
-std::string UpperCase(const std::string& text) {
-    std::string result = text;
-    for (char& c : result) {
-        if (c >= 'a' && c <= 'z')
-            c = c - 32;   // a -> A
-    }
+std::wstring UpperCase(const std::wstring& text) {
+    std::wstring result = text;
+    for (wchar_t& c : result)
+        c = towupper(c);
     return result;
 }
 
-void TypeText(const std::string& text) {
-    for (char c : text) {
+// ===================== TYPE TEXT =====================
+void TypeText(const std::wstring& text) {
+    for (wchar_t c : text) {
         INPUT input[2] = {};
 
         input[0].type = INPUT_KEYBOARD;
@@ -95,7 +91,10 @@ void TypeText(const std::string& text) {
     }
 }
 
+// ===================== MAIN =====================
 int main() {
+    setlocale(LC_ALL, "");
+
     // Ctrl + ;
     RegisterHotKey(nullptr, 1, MOD_CONTROL, VK_OEM_1);
 
@@ -113,23 +112,21 @@ int main() {
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
         if (msg.message == WM_HOTKEY) {
+
             Sleep(50);
             SendCtrlC();
             Sleep(100);
 
-            std::string text = GetClipboardText();
+            std::wstring text = GetClipboardTextW();
             if (text.empty())
                 continue;
 
-            if (msg.wParam == 1) {
+            if (msg.wParam == 1)
                 TypeText(InvertCase(text));
-            }
-            else if (msg.wParam == 2) {
+            else if (msg.wParam == 2)
                 TypeText(LowerCase(text));
-            }
-            else if (msg.wParam == 3) {
+            else if (msg.wParam == 3)
                 TypeText(UpperCase(text));
-            }
         }
     }
 
