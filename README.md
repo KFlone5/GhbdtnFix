@@ -21,9 +21,10 @@ Also includes quick text cleanup tools:
 | Action                              | Default Hotkey         | Example Before → After                              |
 |-------------------------------------|------------------------|-----------------------------------------------------|
 | Fix keyboard layout (RU ↔ EN)       | `Ctrl + Shift + L`     | `Ghbdtn, World!` -> `Привет, World!`                |
-| Remove extra spaces in words        | `Ctrl + Shift + S`     | `Lon don is gr eat` -> `London is great`            |
-| Convert to lowercase                | `Ctrl + Shift + ,`     | `HeLLo WoRLD!` -> `hello world!`                    |
-| Convert to UPPERCASE                | `Ctrl + Shift + .`     | `hello world!` -> `HELLO WORLD!`                    |
+| Remove extra spaces in words        | `Ctrl + Shift + S`     | `Lon don is gr eat` -> `Londonisgreat`              |
+| Invert the case                     | `Ctrl + Shift + ;`     | `HeLLo, WOrLd` -> `hEllO, woRlD`                    |
+| Convert to lowercase                | `Ctrl + Shift + [`     | `HeLLo WoRLD!` -> `hello world!`                    |
+| Convert to UPPERCASE                | `Ctrl + Shift + ]`     | `hello world!` -> `HELLO WORLD!`                    |
 
 *All hotkeys will be fully customizable in future when GUI will be made.*
 
