@@ -49,7 +49,7 @@ std::wstring GetClipboardTextW() {
     return text;
 }
 
-// ===================== CASE FUNCTIONS =====================
+// ===================== TEXT FUNCTIONS =====================
 std::wstring InvertCase(const std::wstring& text) {
     std::wstring result = text;
     for (wchar_t& c : result) {
@@ -72,6 +72,16 @@ std::wstring UpperCase(const std::wstring& text) {
     std::wstring result = text;
     for (wchar_t& c : result)
         c = towupper(c);
+    return result;
+}
+
+std::wstring RemoveSpaces(const std::wstring& text) {
+    std::wstring result;
+    for (size_t i = 0; i < text.length(); ++i) {
+        if (text[i] != L' ') {
+            result += text[i];
+        }
+    }
     return result;
 }
 
@@ -104,10 +114,14 @@ int main() {
     // Ctrl + ]
     RegisterHotKey(nullptr, 3, MOD_CONTROL, VK_OEM_6);
 
+    // Ctrl + 0
+    RegisterHotKey(nullptr, 4, MOD_CONTROL, '0');
+
     std::cout << "Running...\n";
     std::cout << "Ctrl + ;  -> invert case\n";
     std::cout << "Ctrl + [  -> lower case\n";
     std::cout << "Ctrl + ]  -> upper case\n";
+    std::cout << "Ctrl + 0  -> Remove Spaces\n";
 
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -127,12 +141,16 @@ int main() {
                 TypeText(LowerCase(text));
             else if (msg.wParam == 3)
                 TypeText(UpperCase(text));
+            else if (msg.wParam == 4) {
+                TypeText(RemoveSpaces(text));
+            }
         }
     }
 
     UnregisterHotKey(nullptr, 1);
     UnregisterHotKey(nullptr, 2);
     UnregisterHotKey(nullptr, 3);
+    UnregisterHotKey(nullptr, 4);
 
     return 0;
 }
