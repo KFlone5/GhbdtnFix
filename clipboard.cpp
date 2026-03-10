@@ -1,4 +1,5 @@
 #include "clipboard.h"
+#include <iostream>
 
 // ===================== COPY SELECTION =====================
 void SendCtrlC() {
@@ -45,41 +46,6 @@ std::wstring GetClipboardTextW() {
     return text;
 }
 
-// ===================== Keyboard Layouts =====================
-std::string GetLayoutName(HKL hkl) {
-    LANGID langId = LOWORD(hkl);
-    LCID   lcid   = MAKELCID(langId, SORT_DEFAULT);
-    char langName[256] = {};
-    GetLocaleInfoA(lcid, LOCALE_SLANGUAGE, langName, sizeof(langName));
-    if (langName[0] == '\0')
-        snprintf(langName, sizeof(langName), "Unknown (LANGID=0x%04X)", langId);
-    return std::string(langName);
-}
-
-void ShowInstalledLayouts() {
-    int count = GetKeyboardLayoutList(0, nullptr);
-    if (count == 0) { std::cout << "[!] Could get the list of layouts.\n"; return; }
-
-    std::vector<HKL> layouts(count);
-    GetKeyboardLayoutList(count, layouts.data());
-
-    std::cout << "=== Installed Layouts (" << count << ") ===\n";
-    for (int i = 0; i < count; ++i) {
-        std::cout << "  [" << i << "]  HKL=0x" << std::hex << (UINT_PTR)layouts[i]
-                  << std::dec << "  ->  " << GetLayoutName(layouts[i]) << "\n";
-    }
-    std::cout << "\n";
-}
-
-void ShowCurrentLayout() {
-    HWND  hwnd     = GetForegroundWindow();
-    DWORD threadId = GetWindowThreadProcessId(hwnd, nullptr);
-    HKL   hkl      = GetKeyboardLayout(threadId);
-    std::cout << "=== Текущая раскладка ===\n";
-    std::cout << "  HKL  = 0x" << std::hex << (UINT_PTR)hkl << std::dec << "\n";
-    std::cout << "  Язык = " << GetLayoutName(hkl) << "\n\n";
-}
-
 // ===================== TYPE TEXT =====================
 void TypeText(const std::wstring& text) {
     for (wchar_t c : text) {
@@ -94,4 +60,86 @@ void TypeText(const std::wstring& text) {
 
         SendInput(2, input, sizeof(INPUT));
     }
+}
+
+// ===================== GET LAYOUT NAME =====================
+std::string GetLayoutName(HKL hkl) {
+    LANGID langId = LOWORD(hkl);
+    LCID   lcid   = MAKELCID(langId, SORT_DEFAULT);
+    char langName[256] = {};
+    GetLocaleInfoA(lcid, LOCALE_SLANGUAGE, langName, sizeof(langName));
+    if (langName[0] == '\0')
+        snprintf(langName, sizeof(langName), "Unknown (LANGID=0x%04X)", langId);
+    return std::string(langName);
+}
+
+// ===================== SHOW ALL INSTALLED LAYOUTS =====================
+void ShowInstalledLayouts() {
+    int count = GetKeyboardLayoutList(0, nullptr);
+    if (count == 0) {
+        std::cout << "[!] Failed to retrieve layout list.\n";
+        return;
+    }
+
+    std::vector<HKL> layouts(count);
+    GetKeyboardLayoutList(count, layouts.data());
+
+    std::cout << "=== Installed layouts (" << count << " total) ===\n";
+    for (int i = 0; i < count; ++i) {
+        std::cout << "  [" << i << "]  HKL=0x" << std::hex << (UINT_PTR)layouts[i]
+                  << std::dec << "  ->  " << GetLayoutName(layouts[i]) << "\n";
+    }
+    std::cout << "\n";
+}
+
+// ===================== SHOW CURRENT LAYOUT =====================
+void ShowCurrentLayout() {
+    HWND  hwnd     = GetForegroundWindow();
+    DWORD threadId = GetWindowThreadProcessId(hwnd, nullptr);
+    HKL   hkl      = GetKeyboardLayout(threadId);
+
+    std::cout << "=== Current layout ===\n";
+    std::cout << "  HKL      = 0x" << std::hex << (UINT_PTR)hkl << std::dec << "\n";
+    std::cout << "  Language = " << GetLayoutName(hkl) << "\n\n";
+}
+
+// ===================== SWITCH TO NEXT LAYOUT =====================
+// Chain:
+// 1. AttachThreadInput  — attach to the active window's thread context
+// 2. ActivateKeyboardLayout — switch layout inside that thread
+// 3. SendMessage WM_INPUTLANGCHANGEREQUEST — ask the window to apply the change
+// 4. DefWindowProc — apply via default handler if the window didn't handle it
+// 5. DetachThreadInput — detach from the foreign thread
+void SwitchToNextLayout() {
+    int count = GetKeyboardLayoutList(0, nullptr);
+    if (count < 2) {
+        std::cout << "[!] Only one layout installed, nothing to switch to.\n";
+        return;
+    }
+
+    std::vector<HKL> layouts(count);
+    GetKeyboardLayoutList(count, layouts.data());
+
+    HWND  hwnd         = GetForegroundWindow();
+    DWORD targetThread = GetWindowThreadProcessId(hwnd, nullptr);
+    DWORD ownThread    = GetCurrentThreadId();
+
+    HKL current = GetKeyboardLayout(targetThread);
+    std::string from = GetLayoutName(current);
+
+    // Find the next layout in the list
+    int idx = 0;
+    for (int i = 0; i < count; ++i)
+        if (layouts[i] == current) { idx = i; break; }
+    HKL nextHkl = layouts[(idx + 1) % count];
+
+    AttachThreadInput(ownThread, targetThread, TRUE);
+    ActivateKeyboardLayout(nextHkl, KLF_SETFORPROCESS);
+    SendMessage(hwnd, WM_INPUTLANGCHANGEREQUEST, 0, (LPARAM)nextHkl);
+    AttachThreadInput(ownThread, targetThread, FALSE);
+    DefWindowProc(hwnd, WM_INPUTLANGCHANGEREQUEST, 0, (LPARAM)nextHkl);
+
+    std::cout << "=== Layout switched ===\n";
+    std::cout << "  From : " << from << "\n";
+    std::cout << "  To   : " << GetLayoutName(nextHkl) << "\n\n";
 }
