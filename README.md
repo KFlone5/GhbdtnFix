@@ -16,6 +16,10 @@ Also includes quick text cleanup tools:
 - Convert entire selection to lowercase
 - Convert entire selection to UPPERCASE
 
+## Note
+If youre using NON CLI version. Press "CTRL + ALT + Q" to terminate GhbdtnFix. Or you can terminate it in task manager by searching "GhbdtnFix" there.
+Note that this utility uses WinAPI which means it works onyl in Windows
+
 ## Features & Default Hotkeys
 
 | Action                              | Default Hotkey         | Example Before → After                              |
