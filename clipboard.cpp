@@ -45,6 +45,41 @@ std::wstring GetClipboardTextW() {
     return text;
 }
 
+// ===================== Keyboard Layouts =====================
+std::string GetLayoutName(HKL hkl) {
+    LANGID langId = LOWORD(hkl);
+    LCID   lcid   = MAKELCID(langId, SORT_DEFAULT);
+    char langName[256] = {};
+    GetLocaleInfoA(lcid, LOCALE_SLANGUAGE, langName, sizeof(langName));
+    if (langName[0] == '\0')
+        snprintf(langName, sizeof(langName), "Unknown (LANGID=0x%04X)", langId);
+    return std::string(langName);
+}
+
+void ShowInstalledLayouts() {
+    int count = GetKeyboardLayoutList(0, nullptr);
+    if (count == 0) { std::cout << "[!] Could get the list of layouts.\n"; return; }
+
+    std::vector<HKL> layouts(count);
+    GetKeyboardLayoutList(count, layouts.data());
+
+    std::cout << "=== Installed Layouts (" << count << ") ===\n";
+    for (int i = 0; i < count; ++i) {
+        std::cout << "  [" << i << "]  HKL=0x" << std::hex << (UINT_PTR)layouts[i]
+                  << std::dec << "  ->  " << GetLayoutName(layouts[i]) << "\n";
+    }
+    std::cout << "\n";
+}
+
+void ShowCurrentLayout() {
+    HWND  hwnd     = GetForegroundWindow();
+    DWORD threadId = GetWindowThreadProcessId(hwnd, nullptr);
+    HKL   hkl      = GetKeyboardLayout(threadId);
+    std::cout << "=== Текущая раскладка ===\n";
+    std::cout << "  HKL  = 0x" << std::hex << (UINT_PTR)hkl << std::dec << "\n";
+    std::cout << "  Язык = " << GetLayoutName(hkl) << "\n\n";
+}
+
 // ===================== TYPE TEXT =====================
 void TypeText(const std::wstring& text) {
     for (wchar_t c : text) {
