@@ -1,5 +1,5 @@
 # GhbdtnFix
-**Instantly fix text typed in the wrong keyboard layout with single hotkey away.**
+**Instantly fix text typed in the wrong keyboard layout with single hotkey. (Windows only)**
 
 ## What it does
 
