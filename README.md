@@ -24,7 +24,7 @@ Note that this utility uses WinAPI which means it works onyl in Windows
 
 | Action                              | Default Hotkey         | Example Before → After                              |
 |-------------------------------------|------------------------|-----------------------------------------------------|
-| Fix keyboard layout (RU ↔ EN)       | `Ctrl + 9`     | `Ghbdtn, World!` -> `Привет, World!`                |
+| Fix keyboard layout (RU -> EN)       | `Ctrl + 9`     | `Ghbdtn, World!` -> `Привет, World!`                |
 | Remove extra spaces in words        | `Ctrl + 0`     | `Lon don is gr eat` -> `Londonisgreat`              |
 | Invert the case                     | `Ctrl + ;`     | `HeLLo, WOrLd` -> `hEllO, woRlD`                    |
 | Convert to lowercase                | `Ctrl + [`     | `HeLLo WoRLD!` -> `hello world!`                    |
