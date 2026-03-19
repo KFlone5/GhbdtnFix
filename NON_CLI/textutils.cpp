@@ -5,25 +5,35 @@
 std::wstring InvertCase(const std::wstring& text) {
     std::wstring result = text;
     for (wchar_t& c : result) {
-        if (iswlower(c))
-            c = towupper(c);
-        else if (iswupper(c))
-            c = towlower(c);
+        if (IsCharLowerW(c)) {
+            // converting to uppercase
+            wchar_t temp[2] = { c, 0 };
+            CharUpperW(temp);
+            c = temp[0];
+        }
+        else if (IsCharUpperW(c)) {
+            // converting to lowercase
+            wchar_t temp[2] = { c, 0 };
+            CharLowerW(temp);
+            c = temp[0];
+        }
     }
     return result;
 }
 
 std::wstring LowerCase(const std::wstring& text) {
     std::wstring result = text;
-    for (wchar_t& c : result)
-        c = towlower(c);
+    if (!result.empty()) {
+        CharLowerBuffW(&result[0], (DWORD)result.length());
+    }
     return result;
 }
 
 std::wstring UpperCase(const std::wstring& text) {
     std::wstring result = text;
-    for (wchar_t& c : result)
-        c = towupper(c);
+    if (!result.empty()) {
+        CharUpperBuffW(&result[0], (DWORD)result.length());
+    }
     return result;
 }
 
@@ -67,23 +77,19 @@ std::wstring RemapLayoutText(const std::wstring& text) {
     result.reserve(text.size());
 
     for (wchar_t wc : text) {
-        // Step 1: find which VK key produces this character on the source layout
         SHORT vkAndShift = VkKeyScanExW(wc, currentHkl);
 
         if (vkAndShift == -1) {
-            // Character not found on source layout — keep it unchanged
             result += wc;
             continue;
         }
 
-        BYTE vk    = LOBYTE(vkAndShift); // Virtual key code
-        BYTE shift = HIBYTE(vkAndShift); // Shift state (bit 0 = Shift held)
+        BYTE vk    = LOBYTE(vkAndShift);
+        BYTE shift = HIBYTE(vkAndShift);
 
-        // Step 2: build a keyboard state for that VK on the target layout
         BYTE keyState[256] = {};
-        if (shift & 1) keyState[VK_SHIFT] = 0x80; // Shift was held
+        if (shift & 1) keyState[VK_SHIFT] = 0x80;
 
-        // Step 3: translate the VK to a character using the target layout
         wchar_t buf[4] = {};
         int charCount = ToUnicodeEx(vk, 0, keyState, buf, 4, 0, targetHkl);
 
