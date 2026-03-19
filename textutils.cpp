@@ -1,36 +1,30 @@
 #include "textutils.h"
-
-// ===================== HELPERS =====================
-// functions on Windows don't handle anything except Latin (English letters) correctly
-static std::wstring MapCase(const std::wstring& text, DWORD flags) {
-    if (text.empty()) return text;
-    int len = static_cast<int>(text.size());
-    std::wstring result(len, L'\0');
-    LCMapStringW(LOCALE_USER_DEFAULT, flags,
-        text.c_str(), len, &result[0], len);
-    return result;
-}
+#include <cwctype>
 
 // ===================== TEXT TRANSFORMATIONS =====================
 std::wstring InvertCase(const std::wstring& text) {
-    std::wstring lower = MapCase(text, LCMAP_LOWERCASE);
-    std::wstring upper = MapCase(text, LCMAP_UPPERCASE);
     std::wstring result = text;
-    for (size_t i = 0; i < text.size(); ++i) {
-        if (text[i] == lower[i] && text[i] != upper[i])
-            result[i] = upper[i]; // was lowercase -> flip to upper
-        else if (text[i] == upper[i] && text[i] != lower[i])
-            result[i] = lower[i]; // was uppercase -> flip to lower
+    for (wchar_t& c : result) {
+        if (iswlower(c))
+            c = towupper(c);
+        else if (iswupper(c))
+            c = towlower(c);
     }
     return result;
 }
 
 std::wstring LowerCase(const std::wstring& text) {
-    return MapCase(text, LCMAP_LOWERCASE);
+    std::wstring result = text;
+    for (wchar_t& c : result)
+        c = towlower(c);
+    return result;
 }
 
 std::wstring UpperCase(const std::wstring& text) {
-    return MapCase(text, LCMAP_UPPERCASE);
+    std::wstring result = text;
+    for (wchar_t& c : result)
+        c = towupper(c);
+    return result;
 }
 
 std::wstring RemoveSpaces(const std::wstring& text) {
@@ -59,9 +53,9 @@ std::wstring RemapLayoutText(const std::wstring& text) {
     GetKeyboardLayoutList(count, layouts.data());
 
     // Determine the current layout of the active window
-    HWND  hwnd = GetForegroundWindow();
+    HWND  hwnd         = GetForegroundWindow();
     DWORD targetThread = GetWindowThreadProcessId(hwnd, nullptr);
-    HKL   currentHkl = GetKeyboardLayout(targetThread);
+    HKL   currentHkl   = GetKeyboardLayout(targetThread);
 
     // Find the next layout to remap to
     int idx = 0;
@@ -80,7 +74,7 @@ std::wstring RemapLayoutText(const std::wstring& text) {
             continue;
         }
 
-        BYTE vk = LOBYTE(vkAndShift);
+        BYTE vk    = LOBYTE(vkAndShift);
         BYTE shift = HIBYTE(vkAndShift);
 
         BYTE keyState[256] = {};

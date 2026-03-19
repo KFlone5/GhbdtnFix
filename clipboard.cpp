@@ -6,20 +6,18 @@ void SendCtrlC() {
     INPUT inputs[4] = {};
 
     inputs[0].type = INPUT_KEYBOARD;
-    inputs[0].ki.wScan = 0x1D; // Left Ctrl
-    inputs[0].ki.dwFlags = KEYEVENTF_SCANCODE;
+    inputs[0].ki.wVk = VK_CONTROL;
 
     inputs[1].type = INPUT_KEYBOARD;
-    inputs[1].ki.wScan = 0x2E; // C key
-    inputs[1].ki.dwFlags = KEYEVENTF_SCANCODE;
+    inputs[1].ki.wVk = 'C';
 
     inputs[2].type = INPUT_KEYBOARD;
-    inputs[2].ki.wScan = 0x2E;
-    inputs[2].ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+    inputs[2].ki.wVk = 'C';
+    inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
 
     inputs[3].type = INPUT_KEYBOARD;
-    inputs[3].ki.wScan = 0x1D;
-    inputs[3].ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+    inputs[3].ki.wVk = VK_CONTROL;
+    inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
 
     SendInput(4, inputs, sizeof(INPUT));
 }
