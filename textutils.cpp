@@ -1,30 +1,36 @@
 #include "textutils.h"
-#include <cwctype>
+
+// ===================== HELPERS =====================
+// functions on Windows don't handle anything except Latin (English letters) correctly
+static std::wstring MapCase(const std::wstring& text, DWORD flags) {
+    if (text.empty()) return text;
+    int len = static_cast<int>(text.size());
+    std::wstring result(len, L'\0');
+    LCMapStringW(LOCALE_USER_DEFAULT, flags,
+        text.c_str(), len, &result[0], len);
+    return result;
+}
 
 // ===================== TEXT TRANSFORMATIONS =====================
 std::wstring InvertCase(const std::wstring& text) {
+    std::wstring lower = MapCase(text, LCMAP_LOWERCASE);
+    std::wstring upper = MapCase(text, LCMAP_UPPERCASE);
     std::wstring result = text;
-    for (wchar_t& c : result) {
-        if (iswlower(c))
-            c = towupper(c);
-        else if (iswupper(c))
-            c = towlower(c);
+    for (size_t i = 0; i < text.size(); ++i) {
+        if (text[i] == lower[i] && text[i] != upper[i])
+            result[i] = upper[i]; // was lowercase -> flip to upper
+        else if (text[i] == upper[i] && text[i] != lower[i])
+            result[i] = lower[i]; // was uppercase -> flip to lower
     }
     return result;
 }
 
 std::wstring LowerCase(const std::wstring& text) {
-    std::wstring result = text;
-    for (wchar_t& c : result)
-        c = towlower(c);
-    return result;
+    return MapCase(text, LCMAP_LOWERCASE);
 }
 
 std::wstring UpperCase(const std::wstring& text) {
-    std::wstring result = text;
-    for (wchar_t& c : result)
-        c = towupper(c);
-    return result;
+    return MapCase(text, LCMAP_UPPERCASE);
 }
 
 std::wstring RemoveSpaces(const std::wstring& text) {
@@ -38,7 +44,7 @@ std::wstring RemoveSpaces(const std::wstring& text) {
 }
 
 // ===================== KEYBOARD LAYOUT REMAP =====================
-// How it works:
+// Notes for me on how it works:
 //   Each character in the text was physically typed on layout A (wrong layout).
 //   We find the virtual key (VK) that produces that character on layout A,
 //   then ask layout B (the next layout) what character that same VK produces.
@@ -52,10 +58,10 @@ std::wstring RemapLayoutText(const std::wstring& text) {
     std::vector<HKL> layouts(count);
     GetKeyboardLayoutList(count, layouts.data());
 
-    // Determine the current layout of the active window (layout the text was typed in)
-    HWND  hwnd         = GetForegroundWindow();
+    // Determine the current layout of the active window
+    HWND  hwnd = GetForegroundWindow();
     DWORD targetThread = GetWindowThreadProcessId(hwnd, nullptr);
-    HKL   currentHkl   = GetKeyboardLayout(targetThread);
+    HKL   currentHkl = GetKeyboardLayout(targetThread);
 
     // Find the next layout to remap to
     int idx = 0;
@@ -67,23 +73,19 @@ std::wstring RemapLayoutText(const std::wstring& text) {
     result.reserve(text.size());
 
     for (wchar_t wc : text) {
-        // Step 1: find which VK key produces this character on the source layout
         SHORT vkAndShift = VkKeyScanExW(wc, currentHkl);
 
         if (vkAndShift == -1) {
-            // Character not found on source layout — keep it unchanged
             result += wc;
             continue;
         }
 
-        BYTE vk    = LOBYTE(vkAndShift); // Virtual key code
-        BYTE shift = HIBYTE(vkAndShift); // Shift state (bit 0 = Shift held)
+        BYTE vk = LOBYTE(vkAndShift);
+        BYTE shift = HIBYTE(vkAndShift);
 
-        // Step 2: build a keyboard state for that VK on the target layout
         BYTE keyState[256] = {};
         if (shift & 1) keyState[VK_SHIFT] = 0x80; // Shift was held
 
-        // Step 3: translate the VK to a character using the target layout
         wchar_t buf[4] = {};
         int charCount = ToUnicodeEx(vk, 0, keyState, buf, 4, 0, targetHkl);
 
