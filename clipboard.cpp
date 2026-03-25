@@ -104,6 +104,12 @@ void ShowCurrentLayout() {
 }
 
 // ===================== SWITCH TO NEXT LAYOUT =====================
+// Chain:
+// 1. AttachThreadInput  — attach to the active window's thread context
+// 2. ActivateKeyboardLayout — switch layout inside that thread
+// 3. SendMessage WM_INPUTLANGCHANGEREQUEST — ask the window to apply the change
+// 4. DefWindowProc — apply via default handler if the window didn't handle it
+// 5. DetachThreadInput — detach from the foreign thread
 void SwitchToNextLayout() {
     int count = GetKeyboardLayoutList(0, nullptr);
     if (count < 2) {

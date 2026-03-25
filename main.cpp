@@ -23,12 +23,16 @@ int main() {
     // Ctrl + 0  - RemoveSpaces
     RegisterHotKey(nullptr, 5, MOD_CONTROL, '0');
 
+    // Ctrl + Alt + W  - RemoveSpaces
+    RegisterHotKey(nullptr, 6, MOD_CONTROL, '1');
+
     std::cout << "GhbdtnFix running...\n";
+    std::cout << "Ctrl + 1  -> Type Clipboard\n";
     std::cout << "Ctrl + 9  -> Change Keyboard Layout\n";
+    std::cout << "Ctrl + 0  -> Remove_Spaces\n";
     std::cout << "Ctrl + ;  -> Invert Case\n";
     std::cout << "Ctrl + [  -> lowercase\n";
     std::cout << "Ctrl + ]  -> UPPERCASE\n";
-    std::cout << "Ctrl + 0  -> Remove_Spaces\n";
     std::cout << "\n";
 
     ShowInstalledLayouts();
@@ -46,8 +50,10 @@ int main() {
             if (text.empty())
                 continue;
 
-            if (msg.wParam == 1)
+            if (msg.wParam == 1) {
                 TypeText(RemapLayoutText(text));
+                SwitchToNextLayout();
+            }
             else if (msg.wParam == 2)
                 TypeText(InvertCase(text));
             else if (msg.wParam == 3)
@@ -56,6 +62,8 @@ int main() {
                 TypeText(UpperCase(text));
             else if (msg.wParam == 5)
                 TypeText(RemoveSpaces(text));
+            else if (msg.wParam == 6)
+                TypeText(text);
         }
     }
 
@@ -64,6 +72,7 @@ int main() {
     UnregisterHotKey(nullptr, 3);
     UnregisterHotKey(nullptr, 4);
     UnregisterHotKey(nullptr, 5);
+    UnregisterHotKey(nullptr, 6);
 
     return 0;
 }
