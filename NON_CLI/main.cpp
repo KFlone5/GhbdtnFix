@@ -20,15 +20,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     // Ctrl + 0  - RemoveSpaces
     RegisterHotKey(nullptr, 5, MOD_CONTROL, '0');
 
+    // Ctrl + 1  - Type Clipboard
+    RegisterHotKey(nullptr, 6, MOD_CONTROL, '1');
+
     // Ctrl + Alt + Q  - Exit
-    RegisterHotKey(nullptr, 6, MOD_CONTROL | MOD_ALT, 'Q');
+    RegisterHotKey(nullptr, 7, MOD_CONTROL | MOD_ALT, 'Q');
 
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
         if (msg.message == WM_HOTKEY) {
 
             // Exit
-            if (msg.wParam == 6)
+            if (msg.wParam == 7)
                 break;
 
             Sleep(50);
@@ -49,6 +52,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 TypeText(UpperCase(text));
             else if (msg.wParam == 5)
                 TypeText(RemoveSpaces(text));
+            else if (msg.wParam == 6)
+                TypeText(RemoveSpaces(text));
         }
     }
 
@@ -58,6 +63,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     UnregisterHotKey(nullptr, 4);
     UnregisterHotKey(nullptr, 5);
     UnregisterHotKey(nullptr, 6);
+    UnregisterHotKey(nullptr, 7);
 
     return 0;
 }
