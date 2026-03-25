@@ -23,7 +23,7 @@ int main() {
     // Ctrl + 0  - RemoveSpaces
     RegisterHotKey(nullptr, 5, MOD_CONTROL, '0');
 
-    // Ctrl + Alt + W  - RemoveSpaces
+    // Ctrl + 1  - Type Clipboard
     RegisterHotKey(nullptr, 6, MOD_CONTROL, '1');
 
     std::cout << "GhbdtnFix running...\n";
