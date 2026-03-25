@@ -42,8 +42,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             if (text.empty())
                 continue;
 
-            if (msg.wParam == 1)
+            if (msg.wParam == 1) {
                 TypeText(RemapLayoutText(text));
+                SwitchToNextLayout();
+            }
             else if (msg.wParam == 2)
                 TypeText(InvertCase(text));
             else if (msg.wParam == 3)
