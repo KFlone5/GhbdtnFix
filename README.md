@@ -22,7 +22,7 @@ Note that this utility uses WinAPI which means it works onyl in Windows
 
 ## Features & Default Hotkeys
 
-| Action                              | Default Hotkey         | Example Before → After                              |
+| Action                              | Default Hotkey         | Example Before -> After                              |
 |-------------------------------------|------------------------|-----------------------------------------------------|
 | Type last text from clipboard       | `Ctrl + 1`     | `Same principle as with Ctrl + V but it will type`                |
 | Fix keyboard layout (RU -> EN)       | `Ctrl + 9`     | `Ghbdtn, World!` -> `Привет, World!`                |
