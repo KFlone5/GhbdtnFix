@@ -3,7 +3,7 @@
 
 ## What it does
 
-LayoutFixer helps you correct text when you accidentally typed in the wrong keyboard layout.
+GhbdtnFix helps you correct text when you accidentally typed in the wrong keyboard layout.
 
 Classic example:  
 You wanted to write `Hello, World!`  
