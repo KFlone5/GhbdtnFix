@@ -22,7 +22,7 @@ void SendCtrlC() {
     SendInput(4, inputs, sizeof(INPUT));
 }
 
-// ===================== CLIPBOARD (UNICODE) =====================
+// ===================== GET CLIPBOARD (UNICODE) =====================
 std::wstring GetClipboardTextW() {
     if (!OpenClipboard(nullptr))
         return L"";
@@ -44,6 +44,38 @@ std::wstring GetClipboardTextW() {
     GlobalUnlock(hData);
     CloseClipboard();
     return text;
+}
+
+// ===================== SET CLIPBOARD (UNICODE) =====================
+void SetClipboardTextW(const std::wstring& text) {
+    if (!OpenClipboard(nullptr))
+        return;
+
+    EmptyClipboard();
+
+    if (text.empty()) {
+        CloseClipboard();
+        return;
+    }
+
+    size_t bytes = (text.size() + 1) * sizeof(wchar_t);
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, bytes);
+    if (!hMem) {
+        CloseClipboard();
+        return;
+    }
+
+    wchar_t* pMem = static_cast<wchar_t*>(GlobalLock(hMem));
+    if (!pMem) {
+        GlobalFree(hMem);
+        CloseClipboard();
+        return;
+    }
+
+    memcpy(pMem, text.c_str(), bytes);
+    GlobalUnlock(hMem);
+    SetClipboardData(CF_UNICODETEXT, hMem);
+    CloseClipboard();
 }
 
 // ===================== TYPE TEXT =====================
@@ -104,12 +136,6 @@ void ShowCurrentLayout() {
 }
 
 // ===================== SWITCH TO NEXT LAYOUT =====================
-// Chain:
-// 1. AttachThreadInput  — attach to the active window's thread context
-// 2. ActivateKeyboardLayout — switch layout inside that thread
-// 3. SendMessage WM_INPUTLANGCHANGEREQUEST — ask the window to apply the change
-// 4. DefWindowProc — apply via default handler if the window didn't handle it
-// 5. DetachThreadInput — detach from the foreign thread
 void SwitchToNextLayout() {
     int count = GetKeyboardLayoutList(0, nullptr);
     if (count < 2) {
@@ -125,7 +151,7 @@ void SwitchToNextLayout() {
     DWORD ownThread    = GetCurrentThreadId();
 
     HKL current = GetKeyboardLayout(targetThread);
-    std::string from = GetLayoutName(current);
+    // std::string from = GetLayoutName(current);
 
     // Find the next layout in the list
     int idx = 0;
@@ -139,7 +165,7 @@ void SwitchToNextLayout() {
     AttachThreadInput(ownThread, targetThread, FALSE);
     DefWindowProc(hwnd, WM_INPUTLANGCHANGEREQUEST, 0, (LPARAM)nextHkl);
 
-    std::cout << "=== Layout switched ===\n";
-    std::cout << "  From : " << from << "\n";
-    std::cout << "  To   : " << GetLayoutName(nextHkl) << "\n\n";
+    // std::cout << "=== Layout switched ===\n";
+    // std::cout << "  From : " << from << "\n";
+    // std::cout << "  To   : " << GetLayoutName(nextHkl) << "\n\n";
 }
