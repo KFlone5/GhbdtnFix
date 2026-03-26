@@ -42,6 +42,9 @@ int main() {
     while (GetMessage(&msg, nullptr, 0, 0)) {
         if (msg.message == WM_HOTKEY) {
 
+            // Save clipboard before we overwrite it with Ctrl+C
+            std::wstring previousClipboard = GetClipboardTextW();
+
             Sleep(50);
             SendCtrlC();
             Sleep(100);
@@ -64,6 +67,9 @@ int main() {
                 TypeText(RemoveSpaces(text));
             else if (msg.wParam == 6)
                 TypeText(text);
+
+            // Restore clipboard to what it was before
+            SetClipboardTextW(previousClipboard);
         }
     }
 
