@@ -21,7 +21,7 @@ void SendCtrlC() {
     SendInput(4, inputs, sizeof(INPUT));
 }
 
-// ===================== CLIPBOARD (UNICODE) =====================
+// ===================== GET CLIPBOARD (UNICODE) =====================
 std::wstring GetClipboardTextW() {
     if (!OpenClipboard(nullptr))
         return L"";
@@ -43,6 +43,38 @@ std::wstring GetClipboardTextW() {
     GlobalUnlock(hData);
     CloseClipboard();
     return text;
+}
+
+// ===================== SET CLIPBOARD (UNICODE) =====================
+void SetClipboardTextW(const std::wstring& text) {
+    if (!OpenClipboard(nullptr))
+        return;
+
+    EmptyClipboard();
+
+    if (text.empty()) {
+        CloseClipboard();
+        return;
+    }
+
+    size_t bytes = (text.size() + 1) * sizeof(wchar_t);
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, bytes);
+    if (!hMem) {
+        CloseClipboard();
+        return;
+    }
+
+    wchar_t* pMem = static_cast<wchar_t*>(GlobalLock(hMem));
+    if (!pMem) {
+        GlobalFree(hMem);
+        CloseClipboard();
+        return;
+    }
+
+    memcpy(pMem, text.c_str(), bytes);
+    GlobalUnlock(hMem);
+    SetClipboardData(CF_UNICODETEXT, hMem);
+    CloseClipboard();
 }
 
 // ===================== TYPE TEXT =====================

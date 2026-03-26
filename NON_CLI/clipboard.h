@@ -6,6 +6,7 @@
 // ===================== CLIPBOARD & INPUT =====================
 void SendCtrlC();
 std::wstring GetClipboardTextW();
+void SetClipboardTextW(const std::wstring& text);
 void TypeText(const std::wstring& text);
 
 // ===================== KEYBOARD LAYOUT =====================
