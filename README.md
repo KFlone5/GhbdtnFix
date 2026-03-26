@@ -15,6 +15,8 @@ Also includes quick text cleanup tools:
 - Remove extra spaces inside words (`Lon don` -> `London`)
 - Convert entire selection to lowercase
 - Convert entire selection to UPPERCASE
+- Invert case of selected text
+- Type text from clipboard
 
 ## Note
 If youre using NON CLI version. Press "CTRL + ALT + Q" to terminate GhbdtnFix. Or you can terminate it in task manager by searching "GhbdtnFix" there.
