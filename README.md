@@ -38,9 +38,10 @@ Note that this utility uses WinAPI which means it works onyl in Windows
 1. You select any text using mouse drag
 2. Press the hotkey  
 3. App simulates `Ctrl+C` (copies selection to clipboard)  
-4. Reads the clipboard content  
+4. Extracts content from clipboard and reads it  
 5. Applies the chosen transformation  
-6. Pastes the fixed text back (replaces selection)  
-7. Clears the clipboard for privacy
+6. Types the fixed text back (replaces selection)  
+7. Clears the clipboard
+8. Restores the previous content of a clipboard
 
 The whole process usually takes < 1 second.
