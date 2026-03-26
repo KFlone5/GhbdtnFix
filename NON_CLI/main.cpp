@@ -34,6 +34,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             if (msg.wParam == 7)
                 break;
 
+            // Save clipboard before we overwrite it with Ctrl+C
+            std::wstring previousClipboard = GetClipboardTextW();
+
             Sleep(50);
             SendCtrlC();
             Sleep(100);
@@ -56,6 +59,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 TypeText(RemoveSpaces(text));
             else if (msg.wParam == 6)
                 TypeText(RemoveSpaces(text));
+
+            // Restore clipboard to what it was before
+            SetClipboardTextW(previousClipboard);
         }
     }
 
