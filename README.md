@@ -1,4 +1,4 @@
-# GhbdtnFix
+# GhbdtnFix (PrivetFix)
 **Instantly fix text typed in the wrong keyboard layout with single hotkey. (Windows only)**
 
 ## What it does
