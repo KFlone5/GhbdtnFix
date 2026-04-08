@@ -1,10 +1,31 @@
 #pragma comment(linker, "/SUBSYSTEM:WINDOWS")
-#include <windows.h>
 #include "clipboard.h"
 #include "textutils.h"
+#include "startup.h"
+
+// The name under which the program will appear in the registry
+const std::string APP_NAME = "GhbdtnFix";
 
 // ===================== MAIN =====================
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+    std::string currentPath = GetExecutablePath();
+
+    if (!IsInStartup(APP_NAME)) {
+        int msgboxID = MessageBox(
+            NULL,
+            (LPCWSTR)L"GhbdtnFix has been already started!\nWant to add a program to startup?\nThis will allow it to launch automatically when Windows starts.",
+            (LPCWSTR)L"Startup",
+            MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1
+        );
+
+        if (msgboxID == IDYES) {
+            AddToStartup(APP_NAME, currentPath);
+        }
+    }
+    else {
+        AddToStartup(APP_NAME, currentPath);
+    }
+
     // Ctrl + 9 - Change Keyboard Layout
     RegisterHotKey(nullptr, 1, MOD_CONTROL, '9');
 
