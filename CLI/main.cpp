@@ -3,10 +3,31 @@
 #include <locale.h>
 #include "clipboard.h"
 #include "textutils.h"
+#include "startup.h"
+
+const std::string APP_NAME = "GhbdtnFix";
 
 // ===================== MAIN =====================
 int main() {
     setlocale(LC_ALL, "");
+
+    std::string currentPath = GetExecutablePath();
+
+    if (!IsInStartup(APP_NAME)) {
+        int msgboxID = MessageBox(
+            NULL,
+            (LPCWSTR)L"GhbdtnFix has been already started!\nWant to add a program to startup?\nThis will allow it to launch automatically when Windows starts.",
+            (LPCWSTR)L"Startup",
+            MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1
+        );
+
+        if (msgboxID == IDYES) {
+            AddToStartup(APP_NAME, currentPath);
+        }
+    }
+    else {
+        AddToStartup(APP_NAME, currentPath);
+    }
 
     // Ctrl + 9 - Change Keyboard Layout
     RegisterHotKey(nullptr, 1, MOD_CONTROL, '9');
