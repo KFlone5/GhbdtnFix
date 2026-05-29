@@ -53,3 +53,9 @@ Note that this utility uses WinAPI which means it works only in Windows
 8. Restores the previous content of a clipboard
 
 The whole process usually takes < 1 second.
+
+---
+ 
+## Uninstalling
+ 
+Run `GhbdtnFix_Uninstall.exe` - it will remove GhbdtnFix from startup and close the running instance in one click.
