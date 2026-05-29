@@ -22,7 +22,13 @@ Also includes quick text cleanup tools:
 If youre using NON CLI version. Press "CTRL + ALT + Q" to terminate GhbdtnFix. Or you can terminate it in task manager by searching "GhbdtnFix" there.
 Note that this utility uses WinAPI which means it works only in Windows
 
-## Features & Default Hotkeys
+## Features & Default Hotkeys (Always Active HotKeys)
+| Action                 | Default Hotkey         |
+|------------------------|------------------------|
+| Toggle GhbdtnFix Pause | `Ctrl + ]`             |
+| Terminate GhbdtnFix    | `Ctrl + ]`             |
+
+## Features & Default Hotkeys (Temporary Hotkeys)
 
 | Action                              | Default Hotkey         | Example Before -> After                              |
 |-------------------------------------|------------------------|-----------------------------------------------------|
