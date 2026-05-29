@@ -43,7 +43,7 @@ static void ShowTrayNotification(const wchar_t* title, const wchar_t* msg) {
     NOTIFYICONDATAW nid = {};
     nid.cbSize = sizeof(nid);
     nid.hWnd   = GetForegroundWindow();
-    nid.uID    = 0xF1X; // arbitrary unique ID
+    nid.uID    = 0xF1; // arbitrary unique ID
     nid.uFlags = NIF_INFO;
     nid.dwInfoFlags = NIIF_INFO;
     nid.uTimeout    = 2000;
